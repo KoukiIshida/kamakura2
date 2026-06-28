@@ -1,63 +1,157 @@
 {
   "version": 1,
-  "title": "謎解きクイズ",
-  "description": "ニックネームを入れてはじめよう！",
+  "title": "鎌倉まるっと謎さんぽ～裏鎌倉編～",
+  "description": "ぽとに呼んでもらいたいニックネームネームを決めよう！（２文字以上６文字以下、ひらがな・カタカナのみ）",
   "nicknameRule": {
     "minLength": 2,
-    "maxLength": 8,
-    "allowedTypes": ["hiragana", "katakana"]
+    "maxLength": 6,
+    "allowedTypes": [
+      "hiragana",
+      "katakana"
+    ]
   },
   "questions": [
     {
       "type": "fixed",
-      "text": "準備はいいですか？\n「はい」と入力してね。",
+      "answerMode": "fixed",
+      "text": "テスト",
       "image": "",
-      "answerHash": "8f90d85ec13a0b1b12d81203f2f3262ca156028a94aeaf91ae52fcd5a9de4170"
+      "answerHash": "8a535a3f4dcd2c396db11b7c1e54221d04375c9f9be96bce47dc2fdb237e86c9"
     },
     {
       "type": "branch",
       "answerMode": "nickname",
       "rules": [
         {
-          "label": "4文字の人",
+          "label": "",
           "conditions": [
-            { "kind": "length", "op": "eq", "value": 4 }
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 2
+            }
           ],
-          "questionText": "【Aの問題】あなたは4文字さん。ヒント：答えの1文字目は「{1文字目}」、ぜんぶで{文字数}文字。合言葉は… あなたのニックネームを入力してね！",
+          "questionText": "最後の答えは２文字",
           "image": "",
           "answerHash": ""
         },
         {
-          "label": "3文字で1文字目が「あ」の人",
+          "label": "",
           "conditions": [
-            { "kind": "length", "op": "eq", "value": 3 },
-            { "kind": "charAt", "pos": 1, "value": "あ" }
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 4
+            }
           ],
-          "questionText": "【Bの問題】3文字＆「あ」で始まるあなたへ。合言葉は… あなたのニックネームを入力してね！",
+          "questionText": "最後の答えは４文字",
           "image": "",
           "answerHash": ""
         },
         {
-          "label": "2文字目が「い」の人",
+          "label": "",
           "conditions": [
-            { "kind": "charAt", "pos": 2, "value": "い" }
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 5
+            }
           ],
-          "questionText": "【Cの問題】2文字目が「い」のあなたへ。合言葉は… あなたのニックネームを入力してね！",
+          "questionText": "最後の答えは５文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 6
+            }
+          ],
+          "questionText": "最後の答えは６文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは{1文字目}から始まる３文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ"
+            },
+            {
+              "kind": "charAt",
+              "pos": 3,
+              "value": "た",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは{3文字目}で終わる３文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ"
+            },
+            {
+              "kind": "charAt",
+              "pos": 3,
+              "value": "た"
+            },
+            {
+              "kind": "charAt",
+              "pos": 2,
+              "value": "な",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは２文字目が{2文字目}の３文字",
           "image": "",
           "answerHash": ""
         }
       ],
       "default": {
-        "questionText": "【Dの問題】どの条件にも当てはまらなかったあなたへ。合言葉は… あなたのニックネームを入力してね！",
+        "questionText": "最後の答えは３文字",
         "image": "",
         "answerHash": ""
       }
-    },
-    {
-      "type": "fixed",
-      "text": "最後の問題です。「おわり」と入力してね。",
-      "image": "",
-      "answerHash": "28404f21a4b844785265a68153339ddd5a330c41941015144db694409d50d242"
     }
   ]
 }
