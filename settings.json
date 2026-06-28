@@ -14,42 +14,42 @@
   "questions": [
     {
       "type": "fixed",
-      "answerMode": "fixed",
-      "text": "「{ニックネーム}」、よろしくぽと！\n\n次は、１章を解くぽと！\n（ルール説明）\n\n１章の最後の答えがわかったら送信しましょう。",
+      "answerMode": "nickname",
+      "text": "{ニックネーム}、よろしくぽと！\n\n次は、１章を解くぽと！\n（ルール説明）\n\n１章の最後の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
     },
     {
       "type": "fixed",
-      "answerMode": "fixed",
+      "answerMode": "nickname",
       "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、２章を解くぽと！\n（ルール説明）\n\n２章の最後の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
     },
     {
       "type": "fixed",
-      "answerMode": "fixed",
+      "answerMode": "nickname",
       "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、３章を解くぽと！\n（ルール説明）\n\n３章の最後の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
     },
     {
       "type": "fixed",
-      "answerMode": "fixed",
+      "answerMode": "nickname",
       "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、４章を解くぽと！\n（ルール説明）\n\n４章の最後の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
     },
     {
       "type": "fixed",
-      "answerMode": "fixed",
+      "answerMode": "nickname",
       "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、５章を解くぽと！\n（ルール説明）\n\n５章の最後の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
     },
     {
       "type": "fixed",
-      "answerMode": "fixed",
+      "answerMode": "nickname",
       "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、最終章を解くぽと！\n（ルール説明）\n\n最終章の答えがわかったら送信しましょう。",
       "image": "",
       "answerHashes": []
