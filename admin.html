@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理ページ - 謎解きクイズ</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <div class="card">
+      <div class="admin-header">
+        <h1>管理ページ</h1>
+        <div class="toolbar">
+          <button id="btn-import" class="btn btn-ghost btn-small">settings.json を読み込む</button>
+          <input id="file-input" type="file" accept="application/json,.json" class="hidden" />
+          <button id="btn-export" class="btn btn-primary btn-small">settings.json を書き出す</button>
+          <button id="btn-clear-draft" class="btn btn-danger btn-small">下書きをクリア</button>
+        </div>
+      </div>
+
+      <div class="help">
+        ここで設定した内容は、この端末のブラウザに<strong>下書きとして自動保存</strong>されます。<br />
+        参加者に配るには「<strong>settings.json を書き出す</strong>」でファイルを保存し、それを GitHub のリポジトリに置いて（差し替えて）ください。<br />
+        ※ 答えは書き出し時に <code>SHA-256</code> でハッシュ化され、原文はファイルに残りません（＝ソースを見ても答えはわかりません）。<br />
+        ※ 一度書き出した <code>settings.json</code> を読み込んで再編集する場合、答えは伏せられています。変更したい答えだけ入力し直してください（空欄なら元の答えを維持します）。
+      </div>
+
+      <div class="help" style="background:#eef3ff;border-color:#bcd0f5;color:#2c3e66;">
+        💡 <strong>問題文に「差し込みタグ」が使えます</strong>（参加者のニックネームに応じて自動で置き換わります）：<br />
+        <code>{ニックネーム}</code> … ニックネーム全体／
+        <code>{1文字目}</code> … 1文字目（数字を変えて <code>{2文字目}</code> なども可）／
+        <code>{最後の文字}</code>／
+        <code>{文字数}</code><br />
+        例：問題文に <code>答えの1文字目は「{1文字目}」</code> と書くと、ニックネーム「たろう」の人には <code>答えの1文字目は「た」</code> と表示されます。
+      </div>
+
+      <div class="row">
+        <label for="app-title-input">タイトル</label>
+        <input id="app-title-input" type="text" placeholder="例：謎解きクイズ" />
+      </div>
+      <div class="row">
+        <label for="app-desc-input">説明文（任意・スタート画面に表示）</label>
+        <input id="app-desc-input" type="text" placeholder="例：ニックネームを入れてはじめよう！" />
+      </div>
+
+      <div class="section-label">ニックネーム登録ルール</div>
+      <p class="note">参加者が入力したニックネームがこのルールを満たさない場合、はじいて再入力を促します。</p>
+      <div class="inline-row" style="gap:16px;margin-bottom:12px;">
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;color:#44506a;">文字数の下限</label>
+          <input id="nick-min" type="number" min="0" placeholder="例：2" style="width:110px;padding:9px 11px;border:1px solid #d7dce6;border-radius:7px;" />
+        </div>
+        <div>
+          <label style="display:block;font-size:0.85rem;font-weight:600;margin-bottom:4px;color:#44506a;">文字数の上限（0＝無制限）</label>
+          <input id="nick-max" type="number" min="0" placeholder="例：6" style="width:140px;padding:9px 11px;border:1px solid #d7dce6;border-radius:7px;" />
+        </div>
+      </div>
+      <div class="row">
+        <label>使える文字種（チェックした種類だけ許可。すべて未チェックなら制限なし）</label>
+        <div id="nick-types" style="display:flex;flex-wrap:wrap;gap:14px;margin-top:4px;">
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="hiragana" />ひらがな</label>
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="katakana" />カタカナ</label>
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="kanji" />漢字</label>
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="alpha" />英字</label>
+          <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="digit" />数字</label>
+        </div>
+      </div>
+
+      <div id="status" class="status-msg hidden"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">問題一覧</div>
+      <div id="questions-container"></div>
+      <div class="toolbar" style="margin-top:12px;">
+        <button id="btn-add-fixed" class="btn btn-add btn-small">＋ 通常問題を追加（全員共通）</button>
+        <button id="btn-add-branch" class="btn btn-add btn-small">＋ 分岐問題を追加（ニックネームで出し分け）</button>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "title": "謎解きクイズ",
+  "description": "ニックネームを入れてはじめよう！",
+  "nicknameRule": {
+    "minLength": 2,
+    "maxLength": 8,
+    "allowedTypes": ["hiragana", "katakana"]
+  },
+  "questions": [
+    {
+      "type": "fixed",
+      "text": "準備はいいですか？\n「はい」と入力してね。",
+      "image": "",
+      "answerHash": "8f90d85ec13a0b1b12d81203f2f3262ca156028a94aeaf91ae52fcd5a9de4170"
+    },
+    {
+      "type": "branch",
+      "answerMode": "nickname",
+      "rules": [
+        {
+          "label": "4文字の人",
+          "conditions": [
+            { "kind": "length", "op": "eq", "value": 4 }
+          ],
+          "questionText": "【Aの問題】あなたは4文字さん。ヒント：答えの1文字目は「{1文字目}」、ぜんぶで{文字数}文字。合言葉は… あなたのニックネームを入力してね！",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "3文字で1文字目が「あ」の人",
+          "conditions": [
+            { "kind": "length", "op": "eq", "value": 3 },
+            { "kind": "charAt", "pos": 1, "value": "あ" }
+          ],
+          "questionText": "【Bの問題】3文字＆「あ」で始まるあなたへ。合言葉は… あなたのニックネームを入力してね！",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "2文字目が「い」の人",
+          "conditions": [
+            { "kind": "charAt", "pos": 2, "value": "い" }
+          ],
+          "questionText": "【Cの問題】2文字目が「い」のあなたへ。合言葉は… あなたのニックネームを入力してね！",
+          "image": "",
+          "answerHash": ""
+        }
+      ],
+      "default": {
+        "questionText": "【Dの問題】どの条件にも当てはまらなかったあなたへ。合言葉は… あなたのニックネームを入力してね！",
+        "image": "",
+        "answerHash": ""
+      }
+    },
+    {
+      "type": "fixed",
+      "text": "最後の問題です。「おわり」と入力してね。",
+      "image": "",
+      "answerHash": "28404f21a4b844785265a68153339ddd5a330c41941015144db694409d50d242"
+    }
+  ]
+}
