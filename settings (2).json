@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "title": "鎌倉まるっと謎さんぽ～裏鎌倉編～",
+  "description": "ぽとに呼んでもらいたいニックネームネームを決めよう！（２文字以上６文字以下、ひらがな・カタカナのみ）",
+  "nicknameRule": {
+    "minLength": 2,
+    "maxLength": 6,
+    "allowedTypes": [
+      "hiragana",
+      "katakana"
+    ]
+  },
+  "questions": [
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "テスト",
+      "image": "",
+      "answerHash": "8a535a3f4dcd2c396db11b7c1e54221d04375c9f9be96bce47dc2fdb237e86c9"
+    },
+    {
+      "type": "branch",
+      "answerMode": "nickname",
+      "rules": [
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 2
+            }
+          ],
+          "questionText": "最後の答えは２文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 4
+            }
+          ],
+          "questionText": "最後の答えは４文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 5
+            }
+          ],
+          "questionText": "最後の答えは５文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 6
+            }
+          ],
+          "questionText": "最後の答えは６文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは{1文字目}から始まる３文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ"
+            },
+            {
+              "kind": "charAt",
+              "pos": 3,
+              "value": "た",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは{3文字目}で終わる３文字",
+          "image": "",
+          "answerHash": ""
+        },
+        {
+          "label": "",
+          "conditions": [
+            {
+              "kind": "length",
+              "op": "eq",
+              "value": 3
+            },
+            {
+              "kind": "charAt",
+              "pos": 1,
+              "value": "あ"
+            },
+            {
+              "kind": "charAt",
+              "pos": 3,
+              "value": "た"
+            },
+            {
+              "kind": "charAt",
+              "pos": 2,
+              "value": "な",
+              "not": true
+            }
+          ],
+          "questionText": "最後の答えは２文字目が{2文字目}の３文字",
+          "image": "",
+          "answerHash": ""
+        }
+      ],
+      "default": {
+        "questionText": "最後の答えは３文字",
+        "image": "",
+        "answerHash": ""
+      }
+    }
+  ]
+}
