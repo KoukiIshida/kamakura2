@@ -1,22 +1,58 @@
 {
   "version": 1,
   "title": "鎌倉まるっと謎さんぽ～裏鎌倉編～",
-  "description": "ぽとに呼んでもらいたいニックネームネームを決めよう！（２文字以上６文字以下、ひらがな・カタカナのみ）",
+  "description": "ぽとに呼んでもらいたいニックネームネームを決めよう！",
   "nicknameRule": {
     "minLength": 2,
     "maxLength": 6,
     "allowedTypes": [
       "hiragana",
       "katakana"
-    ]
+    ],
+    "askSuffix": true
   },
   "questions": [
     {
       "type": "fixed",
       "answerMode": "fixed",
-      "text": "テスト",
+      "text": "「{ニックネーム}」、よろしくぽと！\n\n次は、１章を解くぽと！\n（ルール説明）\n\n１章の最後の答えがわかったら送信しましょう。",
       "image": "",
-      "answerHash": "8a535a3f4dcd2c396db11b7c1e54221d04375c9f9be96bce47dc2fdb237e86c9"
+      "answerHashes": []
+    },
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、２章を解くぽと！\n（ルール説明）\n\n２章の最後の答えがわかったら送信しましょう。",
+      "image": "",
+      "answerHashes": []
+    },
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、３章を解くぽと！\n（ルール説明）\n\n３章の最後の答えがわかったら送信しましょう。",
+      "image": "",
+      "answerHashes": []
+    },
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、４章を解くぽと！\n（ルール説明）\n\n４章の最後の答えがわかったら送信しましょう。",
+      "image": "",
+      "answerHashes": []
+    },
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、５章を解くぽと！\n（ルール説明）\n\n５章の最後の答えがわかったら送信しましょう。",
+      "image": "",
+      "answerHashes": []
+    },
+    {
+      "type": "fixed",
+      "answerMode": "fixed",
+      "text": "正解ぽと！\n「{ニックネーム}」、すごいぽと！\n\n次は、最終章を解くぽと！\n（ルール説明）\n\n最終章の答えがわかったら送信しましょう。",
+      "image": "",
+      "answerHashes": []
     },
     {
       "type": "branch",
@@ -33,7 +69,7 @@
           ],
           "questionText": "最後の答えは２文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -46,7 +82,7 @@
           ],
           "questionText": "最後の答えは４文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -59,7 +95,7 @@
           ],
           "questionText": "最後の答えは５文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -72,7 +108,7 @@
           ],
           "questionText": "最後の答えは６文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -89,9 +125,9 @@
               "not": true
             }
           ],
-          "questionText": "最後の答えは{1文字目}から始まる３文字",
+          "questionText": "最後の答えは「{1文字目}」から始まる３文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -113,9 +149,9 @@
               "not": true
             }
           ],
-          "questionText": "最後の答えは{3文字目}で終わる３文字",
+          "questionText": "最後の答えは「{3文字目}」で終わる３文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         },
         {
           "label": "",
@@ -142,15 +178,15 @@
               "not": true
             }
           ],
-          "questionText": "最後の答えは２文字目が{2文字目}の３文字",
+          "questionText": "最後の答えは２文字目が「{2文字目}」の３文字",
           "image": "",
-          "answerHash": ""
+          "answerHashes": []
         }
       ],
       "default": {
         "questionText": "最後の答えは３文字",
         "image": "",
-        "answerHash": ""
+        "answerHashes": []
       }
     }
   ]

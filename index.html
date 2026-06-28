@@ -34,6 +34,18 @@
         autocomplete="off"
       />
       <p id="nickname-error" class="error-text hidden">ニックネームを入力してください。</p>
+
+      <div id="suffix-area" class="hidden">
+        <label class="field-label">呼び方を選んでください</label>
+        <div id="suffix-options" class="suffix-options">
+          <button type="button" class="suffix-btn" data-suffix="くん">〇〇くん</button>
+          <button type="button" class="suffix-btn" data-suffix="ちゃん">〇〇ちゃん</button>
+          <button type="button" class="suffix-btn" data-suffix="さん">〇〇さん</button>
+          <button type="button" class="suffix-btn" data-suffix="">呼び捨て</button>
+        </div>
+        <p id="suffix-error" class="error-text hidden">呼び方を選んでください。</p>
+      </div>
+
       <button id="start-button" class="btn btn-primary">スタート</button>
     </section>
 

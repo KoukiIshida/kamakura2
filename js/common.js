@@ -142,17 +142,20 @@ function resolveBranch(nickname, branchQuestion) {
  * 問題文の差し込みタグを、ニックネームの内容で置き換える
  *  使えるタグ:
  *   {ニックネーム}   … ニックネーム全体
+ *   {呼び名}         … ニックネーム＋呼び方（例: たろうくん）
  *   {1文字目}        … 1文字目（{2文字目}…と数字を変えられる。全角数字もOK）
  *   {最後の文字}     … 最後の1文字
  *   {文字数}         … 文字数
  *  該当する文字が無い場合（例: ニックネームより大きい位置）は空文字に置き換える。
+ *  displayName を省略した場合は {呼び名} はニックネームのみになる。
  * ----------------------------------------------------------------------- */
-function applyNicknameTemplate(text, nickname) {
+function applyNicknameTemplate(text, nickname, displayName) {
   if (!text) return '';
   var chars = nicknameChars(nickname);
   var len = chars.length;
   var out = String(text);
 
+  out = out.replace(/\{\s*呼び名\s*\}/g, displayName != null ? displayName : nickname);
   out = out.replace(/\{\s*ニックネーム\s*\}/g, nickname);
   out = out.replace(/\{\s*文字数\s*\}/g, String(len));
   out = out.replace(/\{\s*最後の文字\s*\}/g, len > 0 ? chars[len - 1] : '');

@@ -22,6 +22,9 @@
     nicknameInput:  document.getElementById('nickname-input'),
     nicknameRule:   document.getElementById('nickname-rule'),
     nicknameError:  document.getElementById('nickname-error'),
+    suffixArea:     document.getElementById('suffix-area'),
+    suffixOptions:  document.getElementById('suffix-options'),
+    suffixError:    document.getElementById('suffix-error'),
     startButton:    document.getElementById('start-button'),
     qCurrent:       document.getElementById('q-current'),
     qTotal:         document.getElementById('q-total'),
@@ -39,6 +42,10 @@
   // 状態
   var settings = null;     // settings.json の中身
   var nickname = '';       // 入力されたニックネーム
+  var displayName = '';    // ニックネーム＋呼び方（例: たろうくん）
+  var askSuffix = false;   // 呼び方の選択を求めるか
+  var suffix = '';         // 選ばれた呼び方（くん/ちゃん/さん/''＝呼び捨て）
+  var suffixChosen = false;// 呼び方を選んだか
   var resolvedList = [];   // ニックネームに応じて確定した「出題内容」の配列
   var index = 0;           // 今何問目か（0始まり）
 
@@ -71,8 +78,31 @@
       els.nicknameRule.textContent = ruleHint;
       els.nicknameRule.classList.remove('hidden');
     }
+
+    // 呼び方の選択（くん/ちゃん/さん/呼び捨て）
+    askSuffix = !!(settings.nicknameRule && settings.nicknameRule.askSuffix);
+    if (askSuffix) {
+      els.suffixArea.classList.remove('hidden');
+    }
+
     showScreen('start');
     els.nicknameInput.focus();
+  }
+
+  /* 呼び方ボタンの選択 */
+  if (els.suffixOptions) {
+    els.suffixOptions.addEventListener('click', function (e) {
+      var btn = e.target.closest ? e.target.closest('.suffix-btn') : null;
+      if (!btn) return;
+      suffix = btn.getAttribute('data-suffix') || '';
+      suffixChosen = true;
+      els.suffixError.classList.add('hidden');
+      // 選択状態の見た目を更新
+      var all = els.suffixOptions.querySelectorAll('.suffix-btn');
+      Array.prototype.forEach.call(all, function (b) {
+        b.classList.toggle('selected', b === btn);
+      });
+    });
   }
 
   /* --- ニックネーム登録 → スタート --------------------------------------- */
@@ -92,7 +122,16 @@
       return;
     }
     els.nicknameError.classList.add('hidden');
+
+    // 呼び方が必要なのに未選択ならはじく
+    if (askSuffix && !suffixChosen) {
+      els.suffixError.classList.remove('hidden');
+      return;
+    }
+    els.suffixError.classList.add('hidden');
+
     nickname = value;
+    displayName = nickname + (askSuffix ? suffix : '');
 
     // ニックネームに応じて、全問題の「出題内容」をここで確定させる
     resolvedList = (settings.questions || []).map(function (q) {
@@ -104,6 +143,13 @@
     renderQuestion();
   }
 
+  /* 答えハッシュの配列を取り出す（新形式 answerHashes / 旧形式 answerHash の両対応） */
+  function getAnswerHashes(obj) {
+    if (obj.answerHashes && obj.answerHashes.length) return obj.answerHashes;
+    if (obj.answerHash) return [obj.answerHash];
+    return [];
+  }
+
   /* 1問分の出題内容を確定する（分岐問はニックネームで出し分け） */
   function resolveQuestion(q, nick) {
     var mode = q.answerMode === 'nickname' ? 'nickname' : 'fixed';
@@ -111,12 +157,12 @@
       var picked = resolveBranch(nick, q); // common.js
       if (!picked) {
         // ルールにもデフォルトにも該当しない場合の保険
-        return { questionText: '(この問題は準備中です)', image: '', answerHash: '', answerMode: mode };
+        return { questionText: '(この問題は準備中です)', answerHashes: [], image: '', answerMode: mode };
       }
       return {
         questionText: picked.questionText || '',
         image: picked.image || '',
-        answerHash: picked.answerHash || '',
+        answerHashes: getAnswerHashes(picked),
         answerMode: mode
       };
     }
@@ -124,7 +170,7 @@
     return {
       questionText: q.text || '',
       image: q.image || '',
-      answerHash: q.answerHash || '',
+      answerHashes: getAnswerHashes(q),
       answerMode: mode
     };
   }
@@ -135,8 +181,8 @@
 
     els.qCurrent.textContent = String(index + 1);
     els.qTotal.textContent = String(resolvedList.length);
-    // 差し込みタグ（{1文字目} 等）をニックネームの内容に置き換える
-    els.qText.textContent = applyNicknameTemplate(item.questionText, nickname);
+    // 差し込みタグ（{1文字目}・{呼び名} 等）をニックネームの内容に置き換える
+    els.qText.textContent = applyNicknameTemplate(item.questionText, nickname, displayName);
 
     if (item.image) {
       els.qImage.src = item.image;
@@ -151,7 +197,7 @@
     els.answerFeedback.textContent = '';
     els.answerInput.value = '';
 
-    var hasAnswer = item.answerMode === 'nickname' || !!item.answerHash;
+    var hasAnswer = item.answerMode === 'nickname' || item.answerHashes.length > 0;
     // 答えがある問題 → 入力欄＋こたえるボタン
     // 答えが無い問題 → つぎへボタンのみ（読み物・誘導用）
     els.answerArea.classList.toggle('hidden', !hasAnswer);
@@ -180,7 +226,8 @@
       correct = normalizeAnswer(value) === normalizeAnswer(nickname); // common.js
     } else {
       var inputHash = await hashAnswer(value); // common.js（正規化込み）
-      correct = inputHash === item.answerHash;
+      // 登録された複数の想定解のどれか1つに一致すれば正解
+      correct = item.answerHashes.indexOf(inputHash) !== -1;
     }
 
     if (correct) {
@@ -210,12 +257,19 @@
   /* --- クリア ------------------------------------------------------------ */
   function finish() {
     els.clearMessage.textContent =
-      nickname + ' さん、すべての問題をクリアしました！';
+      displayName + '、すべての問題をクリアしました！';
     showScreen('clear');
   }
 
   els.restartButton.addEventListener('click', function () {
     els.nicknameInput.value = '';
+    // 呼び方の選択をリセット
+    suffix = '';
+    suffixChosen = false;
+    if (els.suffixOptions) {
+      var all = els.suffixOptions.querySelectorAll('.suffix-btn');
+      Array.prototype.forEach.call(all, function (b) { b.classList.remove('selected'); });
+    }
     showScreen('start');
     els.nicknameInput.focus();
   });

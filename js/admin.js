@@ -14,7 +14,7 @@
   var draft = {
     title: '',
     description: '',
-    nicknameRule: { minLength: '', maxLength: '', allowedTypes: [] },
+    nicknameRule: { minLength: '', maxLength: '', allowedTypes: [], askSuffix: false },
     questions: []
   };
 
@@ -28,6 +28,7 @@
   var nickTypeBoxes = Array.prototype.slice.call(
     document.querySelectorAll('#nick-types input[type="checkbox"]')
   );
+  var nickAskSuffix = document.getElementById('nick-ask-suffix');
 
   /* ----- 小さなDOMヘルパー ----------------------------------------------- */
   function el(tag, props, children) {
@@ -64,7 +65,7 @@
         var parsed = JSON.parse(raw);
         draft.title = parsed.title || '';
         draft.description = parsed.description || '';
-        draft.nicknameRule = parsed.nicknameRule || { minLength: '', maxLength: '', allowedTypes: [] };
+        draft.nicknameRule = parsed.nicknameRule || { minLength: '', maxLength: '', allowedTypes: [], askSuffix: false };
         draft.questions = parsed.questions || [];
         return true;
       }
@@ -80,18 +81,18 @@
 
   /* ----- 雛形 ------------------------------------------------------------ */
   function newFixed() {
-    return { type: 'fixed', answerMode: 'fixed', text: '', image: '', answer: '', answerHash: '' };
+    return { type: 'fixed', _open: true, answerMode: 'fixed', text: '', image: '', answer: '', answerHashes: [] };
   }
   function newVariant() {
-    return { questionText: '', image: '', answer: '', answerHash: '' };
+    return { questionText: '', image: '', answer: '', answerHashes: [] };
   }
   function newBranch() {
-    return { type: 'branch', answerMode: 'fixed', rules: [newRule()], default: newVariant() };
+    return { type: 'branch', _open: true, answerMode: 'fixed', rules: [newRule()], default: newVariant() };
   }
   function newRule() {
     return {
       label: '', conditions: [newCondition()],
-      questionText: '', image: '', answer: '', answerHash: ''
+      questionText: '', image: '', answer: '', answerHashes: []
     };
   }
   function newCondition() {
@@ -117,22 +118,51 @@
 
   /* ニックネーム登録ルールの入力欄を draft の値に合わせる */
   function syncNicknameRuleUI() {
-    var rule = draft.nicknameRule || { minLength: '', maxLength: '', allowedTypes: [] };
+    var rule = draft.nicknameRule || { minLength: '', maxLength: '', allowedTypes: [], askSuffix: false };
     nickMinInput.value = rule.minLength === 0 ? '0' : (rule.minLength || '');
     nickMaxInput.value = rule.maxLength === 0 ? '0' : (rule.maxLength || '');
     var types = rule.allowedTypes || [];
     nickTypeBoxes.forEach(function (cb) {
       cb.checked = types.indexOf(cb.getAttribute('data-type')) !== -1;
     });
+    nickAskSuffix.checked = !!rule.askSuffix;
+  }
+
+  /* 折りたたみ時にも内容がわかる短い要約 */
+  function questionSummary(q) {
+    if (q.type === 'branch') {
+      return 'ルール' + (q.rules ? q.rules.length : 0) + '件';
+    }
+    var t = (q.text || '').replace(/\s+/g, ' ').trim();
+    return t ? (t.length > 24 ? t.slice(0, 24) + '…' : t) : '（問題文なし）';
   }
 
   function renderQuestion(q, qi) {
     var isBranch = q.type === 'branch';
+    var isOpen = !!q._open;
+
+    // クリックで開閉するトグル部分（▸/▾ ＋ ラベル）
+    var caret = el('span', { class: 'q-caret', text: isOpen ? '▾' : '▸' });
+    var tag = el('span', {
+      class: 'q-tag' + (isBranch ? ' branch' : ''),
+      text: '問題 ' + (qi + 1) + '：' + (isBranch ? 'ニックネームで分岐' : '通常（全員共通）')
+    });
+    var summary = el('span', { class: 'q-summary', text: questionSummary(q) });
+
+    var body; // ← 先に宣言（トグルから参照するため）
+
+    var toggle = el('div', {
+      class: 'q-toggle',
+      onclick: function () {
+        q._open = !q._open;
+        saveDraft();
+        caret.textContent = q._open ? '▾' : '▸';
+        body.classList.toggle('hidden', !q._open);
+      }
+    }, [caret, tag, summary]);
+
     var head = el('div', { class: 'q-block-head' }, [
-      el('span', {
-        class: 'q-tag' + (isBranch ? ' branch' : ''),
-        text: '問題 ' + (qi + 1) + '：' + (isBranch ? 'ニックネームで分岐' : '通常（全員共通）')
-      }),
+      toggle,
       el('div', { class: 'toolbar' }, [
         el('button', {
           class: 'btn btn-ghost btn-small', text: '▲',
@@ -153,7 +183,6 @@
       ])
     ]);
 
-    var body;
     if (isBranch) {
       body = renderBranchBody(q);
     } else {
@@ -163,6 +192,7 @@
         renderVariantFields(q, '問題文', 'text', hideAnswer)
       ]);
     }
+    body.classList.toggle('hidden', !isOpen);
 
     return el('div', { class: 'q-block' }, [head, body]);
   }
@@ -195,7 +225,7 @@
    *  textKey: 'text'（通常） or 'questionText'（分岐内）
    *  hideAnswer: true なら答え欄を出さない（＝答えはニックネームモード） */
   function renderVariantFields(obj, textLabel, textKey, hideAnswer) {
-    var hasExistingHash = !obj.answer && obj.answerHash;
+    var hasExistingHash = !obj.answer && obj.answerHashes && obj.answerHashes.length > 0;
     var children = [
       el('div', { class: 'row' }, [
         el('label', { text: textLabel }),
@@ -209,10 +239,10 @@
 
     if (!hideAnswer) {
       children.push(el('div', { class: 'row' }, [
-        el('label', { text: '答え' + (hasExistingHash ? '（設定済み・変更する場合のみ入力）' : '（空欄なら答え合わせ無し）') }),
+        el('label', { text: '答え（カンマ「,」区切りで複数登録できます。どれか1つに一致で正解）' + (hasExistingHash ? '（' + obj.answerHashes.length + '件設定済み・変更する場合のみ入力）' : '（空欄なら答え合わせ無し）') }),
         el('input', {
           type: 'text', value: obj.answer || '',
-          placeholder: hasExistingHash ? '●●●（変更する場合のみ入力）' : '例：さくら',
+          placeholder: hasExistingHash ? '●●●（変更する場合のみ入力）' : '例：さくら,サクラ,桜',
           oninput: function (e) { obj.answer = e.target.value; touched(false); }
         })
       ]));
@@ -456,12 +486,21 @@
   /* =======================================================================
    * 書き出し（settings.json 生成）
    * ===================================================================== */
-  async function resolveHash(obj) {
-    // 平文の答えがあればハッシュ化、なければ既存ハッシュを維持、両方なければ ''（答え合わせ無し）
+  async function resolveHashes(obj) {
+    // 平文の答えがあれば（カンマ区切りで複数）ハッシュ化、
+    // なければ既存ハッシュ配列を維持、どちらも無ければ []（答え合わせ無し）
     if (obj.answer && obj.answer.trim() !== '') {
-      return await hashAnswer(obj.answer);
+      var parts = obj.answer.split(',')
+        .map(function (s) { return s.trim(); })
+        .filter(function (s) { return s !== ''; });
+      var hashes = [];
+      for (var i = 0; i < parts.length; i++) {
+        var h = await hashAnswer(parts[i]);
+        if (hashes.indexOf(h) === -1) hashes.push(h); // 重複は除く
+      }
+      return hashes;
     }
-    return obj.answerHash || '';
+    return (obj.answerHashes && obj.answerHashes.length) ? obj.answerHashes : [];
   }
 
   function serializeCondition(c) {
@@ -490,7 +529,8 @@
       nicknameRule: {
         minLength: Number(rule.minLength) || 0,
         maxLength: Number(rule.maxLength) || 0,
-        allowedTypes: rule.allowedTypes || []
+        allowedTypes: rule.allowedTypes || [],
+        askSuffix: !!rule.askSuffix
       },
       questions: []
     };
@@ -510,7 +550,7 @@
             questionText: rule.questionText || '',
             image: rule.image || '',
             // ニックネームモードのときは答えを事前に持たない（実行時にニックネームと照合）
-            answerHash: useNick ? '' : await resolveHash(rule)
+            answerHashes: useNick ? [] : await resolveHashes(rule)
           });
         }
         out.questions.push({
@@ -520,7 +560,7 @@
           default: {
             questionText: q.default.questionText || '',
             image: q.default.image || '',
-            answerHash: useNick ? '' : await resolveHash(q.default)
+            answerHashes: useNick ? [] : await resolveHashes(q.default)
           }
         });
       } else {
@@ -529,7 +569,7 @@
           answerMode: mode,
           text: q.text || '',
           image: q.image || '',
-          answerHash: useNick ? '' : await resolveHash(q)
+          answerHashes: useNick ? [] : await resolveHashes(q)
         });
       }
     }
@@ -560,6 +600,13 @@
   /* =======================================================================
    * 読み込み（settings.json → 編集データ）
    * ===================================================================== */
+  /* 答えハッシュ配列を取り込む（新形式 answerHashes / 旧形式 answerHash 両対応） */
+  function importHashes(obj) {
+    if (obj.answerHashes && obj.answerHashes.length) return obj.answerHashes.slice();
+    if (obj.answerHash) return [obj.answerHash];
+    return [];
+  }
+
   function importCondition(c) {
     return {
       kind: c.kind,
@@ -577,7 +624,8 @@
     draft.nicknameRule = {
       minLength: nr.minLength ? String(nr.minLength) : '',
       maxLength: nr.maxLength ? String(nr.maxLength) : '',
-      allowedTypes: nr.allowedTypes || []
+      allowedTypes: nr.allowedTypes || [],
+      askSuffix: !!nr.askSuffix
     };
     draft.questions = (data.questions || []).map(function (q) {
       if (q.type === 'branch') {
@@ -591,14 +639,14 @@
               questionText: r.questionText || '',
               image: r.image || '',
               answer: '',
-              answerHash: r.answerHash || ''
+              answerHashes: importHashes(r)
             };
           }),
           default: {
             questionText: (q.default && q.default.questionText) || '',
             image: (q.default && q.default.image) || '',
             answer: '',
-            answerHash: (q.default && q.default.answerHash) || ''
+            answerHashes: importHashes(q.default || {})
           }
         };
       }
@@ -608,7 +656,7 @@
         text: q.text || '',
         image: q.image || '',
         answer: '',
-        answerHash: q.answerHash || ''
+        answerHashes: importHashes(q)
       };
     });
   }
@@ -636,6 +684,19 @@
         .map(function (b) { return b.getAttribute('data-type'); });
       saveDraft();
     });
+  });
+  nickAskSuffix.addEventListener('change', function (e) {
+    draft.nicknameRule.askSuffix = e.target.checked;
+    saveDraft();
+  });
+
+  document.getElementById('btn-expand-all').addEventListener('click', function () {
+    draft.questions.forEach(function (q) { q._open = true; });
+    touched(true);
+  });
+  document.getElementById('btn-collapse-all').addEventListener('click', function () {
+    draft.questions.forEach(function (q) { q._open = false; });
+    touched(true);
   });
 
   document.getElementById('btn-add-fixed').addEventListener('click', function () {
@@ -673,7 +734,7 @@
     if (!confirm('編集中の下書きをすべて消します。よろしいですか？')) return;
     draft.title = '';
     draft.description = '';
-    draft.nicknameRule = { minLength: '', maxLength: '', allowedTypes: [] };
+    draft.nicknameRule = { minLength: '', maxLength: '', allowedTypes: [], askSuffix: false };
     draft.questions = [];
     try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
     render();

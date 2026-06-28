@@ -29,6 +29,7 @@
       <div class="help" style="background:#eef3ff;border-color:#bcd0f5;color:#2c3e66;">
         💡 <strong>問題文に「差し込みタグ」が使えます</strong>（参加者のニックネームに応じて自動で置き換わります）：<br />
         <code>{ニックネーム}</code> … ニックネーム全体／
+        <code>{呼び名}</code> … ニックネーム＋呼び方（例：たろうくん）／
         <code>{1文字目}</code> … 1文字目（数字を変えて <code>{2文字目}</code> なども可）／
         <code>{最後の文字}</code>／
         <code>{文字数}</code><br />
@@ -66,12 +67,24 @@
           <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" data-type="digit" />数字</label>
         </div>
       </div>
+      <div class="row" style="background:#eefaf1;border:1px solid #bfe6cd;border-radius:8px;padding:10px 12px;">
+        <label style="display:flex;align-items:flex-start;gap:8px;font-weight:600;color:#1f6d3f;cursor:pointer;">
+          <input type="checkbox" id="nick-ask-suffix" />
+          呼び方（くん／ちゃん／さん／呼び捨て）を参加者に選んでもらう
+        </label>
+        <p class="note" style="margin:6px 0 0;">オンにすると、問題文やクリア画面で <code>{呼び名}</code>（例：たろうくん）が使えます。ニックネーム本体（文字数・文字種）とは別の設定です。</p>
+      </div>
 
       <div id="status" class="status-msg hidden"></div>
     </div>
 
     <div class="card">
       <div class="section-label">問題一覧</div>
+      <p class="note">各問題のタイトル部分をクリックすると、詳細設定を開閉できます。</p>
+      <div class="toolbar" style="margin-bottom:10px;">
+        <button id="btn-expand-all" class="btn btn-ghost btn-small">すべて開く</button>
+        <button id="btn-collapse-all" class="btn btn-ghost btn-small">すべて閉じる</button>
+      </div>
       <div id="questions-container"></div>
       <div class="toolbar" style="margin-top:12px;">
         <button id="btn-add-fixed" class="btn btn-add btn-small">＋ 通常問題を追加（全員共通）</button>

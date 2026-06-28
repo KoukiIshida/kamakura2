@@ -89,6 +89,33 @@ body {
 .question-text { font-size: 1.25rem; margin: 0 0 16px; white-space: pre-wrap; }
 .question-image { max-width: 100%; border-radius: 8px; margin-bottom: 16px; }
 
+/* 呼び方の選択ボタン */
+.suffix-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.suffix-btn {
+  flex: 1 1 auto;
+  min-width: 90px;
+  padding: 11px 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.suffix-btn:hover { border-color: var(--primary); }
+.suffix-btn.selected {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
 .feedback { font-weight: 700; margin: 4px 0 14px; }
 .feedback-ok { color: var(--ok); }
 .feedback-ng { color: var(--ng); }
@@ -139,6 +166,31 @@ body {
   font-size: 0.8rem;
 }
 .q-block-head .q-tag.branch { background: #b9651f; }
+
+/* 開閉トグル */
+.q-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  flex: 1 1 auto;
+  min-width: 0;
+  user-select: none;
+}
+.q-toggle:hover .q-summary { color: var(--text); }
+.q-caret {
+  font-size: 0.8rem;
+  color: var(--muted);
+  width: 1em;
+  flex: 0 0 auto;
+}
+.q-summary {
+  color: var(--muted);
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .row { margin-bottom: 12px; }
 .row label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #44506a; }
