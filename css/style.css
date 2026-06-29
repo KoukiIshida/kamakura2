@@ -87,7 +87,9 @@ body {
 /* 参加者ページ：問題 */
 .progress { color: var(--muted); font-size: 0.9rem; margin: 0 0 8px; }
 .question-text { font-size: 1.25rem; margin: 0 0 16px; white-space: pre-wrap; }
-.question-image { max-width: 100%; border-radius: 8px; margin-bottom: 16px; }
+.question-images { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.question-images:empty { margin-bottom: 0; }
+.question-image { max-width: 100%; border-radius: 8px; display: block; }
 
 /* 呼び方の選択ボタン */
 .suffix-options {

@@ -81,10 +81,10 @@
 
   /* ----- 雛形 ------------------------------------------------------------ */
   function newFixed() {
-    return { type: 'fixed', _open: true, answerMode: 'fixed', text: '', image: '', answer: '', answerHashes: [] };
+    return { type: 'fixed', _open: true, answerMode: 'fixed', text: '', images: [], answer: '', answerHashes: [] };
   }
   function newVariant() {
-    return { questionText: '', image: '', answer: '', answerHashes: [] };
+    return { questionText: '', images: [], answer: '', answerHashes: [] };
   }
   function newBranch() {
     return { type: 'branch', _open: true, answerMode: 'fixed', rules: [newRule()], default: newVariant() };
@@ -92,7 +92,7 @@
   function newRule() {
     return {
       label: '', conditions: [newCondition()],
-      questionText: '', image: '', answer: '', answerHashes: []
+      questionText: '', images: [], answer: '', answerHashes: []
     };
   }
   function newCondition() {
@@ -251,51 +251,76 @@
     return el('div', {}, children);
   }
 
-  /* 画像のアップロード欄（Base64データURIとして settings.json に埋め込む）
+  /* 画像のアップロード欄（複数枚対応・Base64データURIとして settings.json に埋め込む）
    *  → これにより、参加者URLを配った別端末でも画像がそのまま表示される。
    *    （別途リポジトリに画像ファイルを置く必要がない） */
   function renderImageRow(obj) {
-    var children = [el('label', { text: '画像（任意・アップロード）' })];
+    if (!obj.images) obj.images = [];
+    var images = obj.images;
+
+    var children = [el('label', { text: '画像（任意・複数枚OK。上から順に表示されます）' })];
 
     children.push(el('input', {
       type: 'file',
       accept: 'image/*',
+      multiple: 'multiple',
       onchange: function (e) {
-        var file = e.target.files[0];
-        if (!file) return;
-        // 大きすぎる画像は settings.json が重くなるので警告
-        if (file.size > 500 * 1024) {
-          var sizeKB = Math.round(file.size / 1024);
-          if (!confirm(
-            '画像サイズが大きめです（' + sizeKB + 'KB）。\n' +
-            'settings.json が重くなり、参加者の読み込みが遅くなることがあります。\n' +
-            '（推奨：300KB以下）このまま使いますか？'
-          )) { e.target.value = ''; return; }
-        }
-        var reader = new FileReader();
-        reader.onload = function () {
-          obj.image = reader.result; // data:image/...;base64,xxxx
-          touched(true);
-        };
-        reader.readAsDataURL(file);
+        var files = Array.prototype.slice.call(e.target.files);
+        if (!files.length) return;
+        var pending = 0;
+        files.forEach(function (file) {
+          if (file.size > 500 * 1024) {
+            var sizeKB = Math.round(file.size / 1024);
+            if (!confirm(
+              file.name + ' は大きめです（' + sizeKB + 'KB）。\n' +
+              'settings.json が重くなり、参加者の読み込みが遅くなることがあります。\n' +
+              '（推奨：300KB以下）このまま使いますか？'
+            )) { return; }
+          }
+          pending++;
+          var reader = new FileReader();
+          reader.onload = function () {
+            images.push(reader.result);
+            pending--;
+            if (pending === 0) touched(true);
+          };
+          reader.readAsDataURL(file);
+        });
         e.target.value = '';
+        // 同期的に読み込み対象が無かった場合の保険
+        if (pending === 0) touched(true);
       }
     }));
 
-    if (obj.image) {
-      children.push(el('div', { style: 'margin-top:8px;' }, [
-        el('img', {
-          src: obj.image,
-          style: 'max-width:160px;max-height:120px;border-radius:6px;border:1px solid #d7dce6;display:block;margin-bottom:6px;'
-        }),
-        el('button', {
-          class: 'btn btn-danger btn-small', text: '画像を削除',
-          onclick: function () { obj.image = ''; touched(true); }
-        })
-      ]));
+    if (images.length) {
+      var list = el('div', { style: 'margin-top:8px;display:flex;flex-direction:column;gap:8px;' }, []);
+      images.forEach(function (src, ii) {
+        list.appendChild(el('div', { style: 'display:flex;align-items:center;gap:8px;' }, [
+          el('span', { class: 'note', text: (ii + 1) + '枚目', style: 'width:48px;flex:0 0 auto;' }),
+          el('img', {
+            src: src,
+            style: 'max-width:120px;max-height:90px;border-radius:6px;border:1px solid #d7dce6;'
+          }),
+          el('div', { class: 'toolbar' }, [
+            el('button', { class: 'btn btn-ghost btn-small', text: '▲', onclick: function () { moveImage(images, ii, -1); } }),
+            el('button', { class: 'btn btn-ghost btn-small', text: '▼', onclick: function () { moveImage(images, ii, 1); } }),
+            el('button', { class: 'btn btn-danger btn-small', text: '削除', onclick: function () { images.splice(ii, 1); touched(true); } })
+          ])
+        ]));
+      });
+      children.push(list);
     }
 
     return el('div', { class: 'row' }, children);
+  }
+
+  function moveImage(images, ii, dir) {
+    var ni = ii + dir;
+    if (ni < 0 || ni >= images.length) return;
+    var tmp = images[ii];
+    images[ii] = images[ni];
+    images[ni] = tmp;
+    touched(true);
   }
 
   /* 分岐問題の本体：ルール一覧＋デフォルト */
@@ -548,7 +573,7 @@
             label: rule.label || '',
             conditions: conds,
             questionText: rule.questionText || '',
-            image: rule.image || '',
+            images: rule.images || [],
             // ニックネームモードのときは答えを事前に持たない（実行時にニックネームと照合）
             answerHashes: useNick ? [] : await resolveHashes(rule)
           });
@@ -559,7 +584,7 @@
           rules: rules,
           default: {
             questionText: q.default.questionText || '',
-            image: q.default.image || '',
+            images: q.default.images || [],
             answerHashes: useNick ? [] : await resolveHashes(q.default)
           }
         });
@@ -568,7 +593,7 @@
           type: 'fixed',
           answerMode: mode,
           text: q.text || '',
-          image: q.image || '',
+          images: q.images || [],
           answerHashes: useNick ? [] : await resolveHashes(q)
         });
       }
@@ -607,6 +632,13 @@
     return [];
   }
 
+  /* 画像配列を取り込む（新形式 images / 旧形式 image 両対応） */
+  function importImages(obj) {
+    if (obj.images && obj.images.length) return obj.images.slice();
+    if (obj.image) return [obj.image];
+    return [];
+  }
+
   function importCondition(c) {
     return {
       kind: c.kind,
@@ -637,14 +669,14 @@
               label: r.label || '',
               conditions: (r.conditions || []).map(importCondition),
               questionText: r.questionText || '',
-              image: r.image || '',
+              images: importImages(r),
               answer: '',
               answerHashes: importHashes(r)
             };
           }),
           default: {
             questionText: (q.default && q.default.questionText) || '',
-            image: (q.default && q.default.image) || '',
+            images: importImages(q.default || {}),
             answer: '',
             answerHashes: importHashes(q.default || {})
           }
@@ -654,7 +686,7 @@
         type: 'fixed',
         answerMode: q.answerMode === 'nickname' ? 'nickname' : 'fixed',
         text: q.text || '',
-        image: q.image || '',
+        images: importImages(q),
         answer: '',
         answerHashes: importHashes(q)
       };

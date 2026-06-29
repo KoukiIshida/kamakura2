@@ -29,7 +29,7 @@
     qCurrent:       document.getElementById('q-current'),
     qTotal:         document.getElementById('q-total'),
     qText:          document.getElementById('q-text'),
-    qImage:         document.getElementById('q-image'),
+    qImages:        document.getElementById('q-images'),
     answerArea:     document.getElementById('answer-area'),
     answerInput:    document.getElementById('answer-input'),
     answerFeedback: document.getElementById('answer-feedback'),
@@ -150,6 +150,13 @@
     return [];
   }
 
+  /* 画像の配列を取り出す（新形式 images / 旧形式 image の両対応） */
+  function getImages(obj) {
+    if (obj.images && obj.images.length) return obj.images;
+    if (obj.image) return [obj.image];
+    return [];
+  }
+
   /* 1問分の出題内容を確定する（分岐問はニックネームで出し分け） */
   function resolveQuestion(q, nick) {
     var mode = q.answerMode === 'nickname' ? 'nickname' : 'fixed';
@@ -157,11 +164,11 @@
       var picked = resolveBranch(nick, q); // common.js
       if (!picked) {
         // ルールにもデフォルトにも該当しない場合の保険
-        return { questionText: '(この問題は準備中です)', answerHashes: [], image: '', answerMode: mode };
+        return { questionText: '(この問題は準備中です)', answerHashes: [], images: [], answerMode: mode };
       }
       return {
         questionText: picked.questionText || '',
-        image: picked.image || '',
+        images: getImages(picked),
         answerHashes: getAnswerHashes(picked),
         answerMode: mode
       };
@@ -169,7 +176,7 @@
     // 通常問題（全員共通）
     return {
       questionText: q.text || '',
-      image: q.image || '',
+      images: getImages(q),
       answerHashes: getAnswerHashes(q),
       answerMode: mode
     };
@@ -184,13 +191,15 @@
     // 差し込みタグ（{1文字目}・{呼び名} 等）をニックネームの内容に置き換える
     els.qText.textContent = applyNicknameTemplate(item.questionText, nickname, displayName);
 
-    if (item.image) {
-      els.qImage.src = item.image;
-      els.qImage.classList.remove('hidden');
-    } else {
-      els.qImage.classList.add('hidden');
-      els.qImage.removeAttribute('src');
-    }
+    // 画像（複数枚）を表示
+    els.qImages.innerHTML = '';
+    item.images.forEach(function (src) {
+      var img = document.createElement('img');
+      img.src = src;
+      img.className = 'question-image';
+      img.alt = '問題画像';
+      els.qImages.appendChild(img);
+    });
 
     // フィードバック・入力欄リセット
     els.answerFeedback.classList.add('hidden');
